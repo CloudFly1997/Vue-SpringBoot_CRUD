@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.cloudfly.springboot.crud.mapper.UserMapper">
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.cloudfly.springboot.crud.pojo.User">
+        <id column="user_id" property="userId"/>
+        <result column="user_name" property="userName"/>
+        <result column="user_sex" property="userSex"/>
+        <result column="user_age" property="userAge"/>
+        <result column="user_birthday" property="userBirthday"/>
+        <result column="user_department" property="userDepartment"/>
+        <result column="created_time" property="createdTime"/>
+        <result column="created_by" property="createdBy"/>
+        <result column="update_time" property="updateTime"/>
+        <result column="update_by" property="updateBy"/>
+        <result column="version" property="version"/>
+        <result column="deleted" property="deleted"/>
+
+        <association property="department" resultMap="com.cloudfly.springboot.crud.mapper.DepartmentMapper.BaseResultMap"/>
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        user_id, user_name, user_sex, user_age, user_birthday, user_department, created_time, created_by, update_time, update_by, version, deleted
+    </sql>
+
+    <insert id="save">
+        insert into user (
+        user_id, user_name, user_age, user_sex,
+        user_birthday, user_department, created_time
+        )
+        values
+        (
+        #{userId}, #{userName}, #{userAge}, #{userSex},
+        #{userBirthday}, #{userDepartment}, #{createdTime}
+        )
+    </insert>
+    <update id="deleteById">
+        update user set
+        deleted = 1
+        where user_id = #{userId}
+    </update>
+    <update id="updateById" parameterType="com.cloudfly.springboot.crud.pojo.User">
+        update user set
+        version = version + 1
+        <if test="userName!=null and userName!=''">
+            ,user_name = #{userName}
+        </if>
+        <if test="userAge!=null and userAge!=''">
+            ,user_age = #{userAge}
+        </if>
+        <if test="userBirthday!=null and userBirthday!=''">
+            ,user_birthday = #{userBirthday}
+        </if>
+        <if test="userDepartment!=null and userDepartment!=''">
+            ,user_department = #{userDepartment}
+        </if>
+        <if test="updateTime!=null and updateTime!=''">
+            ,update_time = #{updateTime}
+        </if>
+        where user_id = #{userId}
+        and version = #{version}
+    </update>
+    <select id="getById" resultMap="BaseResultMap">
+        select
+        user_id,
+        user_name,
+        user_sex,
+        user_age,
+        user_birthday,
+        user_department,
+        name,
+        version
+        from user
+        left join department on user_department = id
+        where user_id = #{userId}
+        and deleted = 0
+    </select>
+    <select id="getAll" resultMap="BaseResultMap" parameterType="com.cloudfly.springboot.crud.vo.UserVo">
+        select
+            user_id,
+            user_name,
+            user_sex,
+            user_age,
+            user_birthday,
+            user_department,
+            created_time,
+            update_time,
+            name
+        from user
+        left join department on user_department = id
+        where
+        deleted = 0
+        <if test="userName != null and userName != ''">
+            and user_name like concat('%',#{userName},'%')
+        </if>
+        <if test="userBirthdayStart!=null and userBirthdayStart!=''">
+            and user_birthday between #{userBirthdayStart} and #{userBirthdayEnd}
+        </if>
+        <if test="userDepartment!=null and userDepartment!=''">
+            and user_department = #{userDepartment}
+        </if>
+        <if test="userSex!=null and userSex!=''">
+            and user_sex = #{userSex}
+        </if>
+        <if test="createdTime!=null and createdTime!=''">
+            and created_time between #{createdTimeStart} and #{createdTimeEnd}
+        </if>
+        <if test="sortColumn!=null and sortColumn!=''">
+            order by ${sortColumn} ${sortMethod}
+        </if>
+    </select>
+</mapper>
