@@ -1,4 +1,4 @@
-## 基于 Vue+SpringBoot 的CRUD
+## 基于 Vue+SpringBoot 的增删改查
 
 ### 截图
 
